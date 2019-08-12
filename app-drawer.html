@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>App Drawer</title>
+</head>
+<body>
+    <button class="add-square">Add</button>
+    <button class="remove-square">Remove</button>
+    
+    <script>
+        class Square extends HTMLElement {
+            
+            static get observedAttributes() {
+                return ['c', 'l'];
+            }
+            
+            constructor() {
+                // Always call super first in constructor
+                super();
+                
+                const shadow = this.attachShadow({mode: 'open'});
+                const div = document.createElement('div');
+                const style = document.createElement('style');
+                shadow.appendChild(style);
+                shadow.appendChild(div);
+            }
+            
+            // Called every time the component is connected to the DOM
+            connectedCallback() {
+                console.log('connectedCallback()');
+            }
+            // Caled every time the component is disconnected from the DOM
+            disconnectedCallback() {
+                console.log('disconnectedCallback()');
+            }
+            // Invoked each time one of the custom element's attributes is added, removed, or changed.
+            // Which attributes to notice change for is specified in a static get observedAttributes method
+            attributeChangedCallback(name, oldValue, newValue) {
+                console.log('attributeChangedCallback() ------ ');
+                console.log(`name ${name} | oldValue ${oldValue} | newValue ${newValue}`);
+                updateStyle(this);
+            }
+            // Invoked each time the custom element is moved to a new document.
+            adoptedCallback() {
+                console.log('adoptedCallback()');
+            }
+            
+        }
+        window.customElements.define('custom-square', Square);
+        
+        function updateStyle(elem) {
+            const shadow = elem.shadowRoot;
+            shadow.querySelector('style').textContent = `
+            div {
+                width: ${elem.getAttribute('l')}px;
+                height: ${elem.getAttribute('l')}px;
+                background-color: ${elem.getAttribute('c')};
+                color: #FFF
+            }
+            `;
+        }
+        
+        let counter = 0;
+        
+        // add action
+        const add = document.querySelector('.add-square');
+        
+        add.addEventListener('click', function() {
+            const customSquare = document.createElement('custom-square');
+            customSquare.shadowRoot.querySelector('div').textContent = `square number ${counter++}`;
+            customSquare.setAttribute('l', '100');
+            customSquare.setAttribute('c', 'red');
+            document.body.appendChild(customSquare);
+        })
+        
+        // remove action
+        const remove = document.querySelector('.remove-square');
+        
+        remove.addEventListener('click', function() {
+            const customSquare = document.getElementsByTagName('custom-square');
+            if (customSquare.length) {
+                document.body.removeChild(customSquare[0]);
+            } else {
+                console.log('no more custom square');
+            }
+        })
+    </script>
+</body>
+</html>
